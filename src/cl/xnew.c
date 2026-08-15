@@ -1,9 +1,6 @@
+#include "xnew.h"
 
-
-#include "types.h"
-#include <wchar.h>
-
-NORETURN void internal(const wchar_t* file, size_t line);
+#include "clmain.h"
 
 void* xnew(size_t size) {
     void* p = malloc(size);
