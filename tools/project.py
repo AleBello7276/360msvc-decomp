@@ -121,8 +121,9 @@ class Object:
                 Path(obj.options["asm_dir"]) / obj.options["source"]
             ).with_suffix(".s")
         base_name = Path(self.name).with_suffix("")
-        obj.src_obj_path = build_dir / "src" / f"{base_name}.o"
-        obj.asm_obj_path = build_dir / "mod" / f"{base_name}.o"
+        suffix = ".obj" if config.compiler_kind == "msvc" else ".o"
+        obj.src_obj_path = build_dir / "src" / f"{base_name}{suffix}"
+        obj.asm_obj_path = build_dir / "mod" / f"{base_name}{suffix}"
         obj.ctx_path = build_dir / "src" / f"{base_name}.ctx"
         return obj
 
@@ -160,6 +161,8 @@ class ProjectConfig:
 
         # Project config
         self.non_matching: bool = False
+        # Select native host compiler rules for the MSVC decomp project.
+        self.compiler_kind: str = "mwcc"
         self.build_rels: bool = True  # Build REL files
         self.check_sha_path: Optional[Path] = None  # Path to version.sha1
         self.config_path: Optional[Path] = None  # Path to config.yml
@@ -446,10 +449,199 @@ def load_build_config(
 def generate_build(config: ProjectConfig) -> None:
     config.validate()
     objects = config.objects()
+    if config.compiler_kind == "msvc":
+        generate_msvc_build(config, objects)
+        generate_msvc_objdiff(config, objects)
+        generate_msvc_compile_commands(config, objects)
+        return
     build_config = load_build_config(config, config.out_path() / "config.json")
     generate_build_ninja(config, objects, build_config)
     generate_objdiff_config(config, objects, build_config)
     generate_compile_commands(config, objects, build_config)
+
+
+def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> None:
+    """Generate the first M2 Ninja graph without the MWCC link pipeline."""
+    out = io.StringIO()
+    n = ninja_syntax.Writer(out)
+    build_path = config.out_path()
+    n.variable("ninja_required_version", "1.3")
+    n.variable("python", f'"{sys.executable}"')
+    n.variable("objdiff_report_args", make_flags_str(config.progress_report_args))
+    n.newline()
+    n.rule(
+        name="configure",
+        command="$python configure.py configure --no-progress",
+        generator=True,
+        description="CONFIGURE",
+    )
+    n.build(
+        outputs="build.ninja",
+        rule="configure",
+        implicit=[
+            "configure.py",
+            "tools/project.py",
+            Path("config") / config.version / "config.json",
+            *sorted((Path("config") / config.version).glob("*/objects.json")),
+        ],
+    )
+    n.newline()
+
+    build_tools_path = config.build_dir / "tools"
+    download_tool = config.tools_dir / "download_tool.py"
+    objdiff = build_tools_path / f"objdiff-cli{EXE}"
+    n.rule(
+        name="download_tool",
+        command=f"$python {download_tool} $tool $out --tag $tag",
+        description="TOOL $out",
+    )
+    n.build(
+        outputs=objdiff,
+        rule="download_tool",
+        implicit=download_tool,
+        variables={"tool": "objdiff-cli", "tag": config.objdiff_tag},
+    )
+    n.build(outputs="tools", rule="phony", inputs=[objdiff])
+    n.newline()
+
+    compiler = config.compilers() / "cl.exe"
+    masm = config.compilers() / "ml.exe"
+    n.rule(name="msvc", command=f"{compiler} $cflags /showIncludes /Fo$out $in", description="MSVC $out", deps="msvc")
+    n.variable("msvc_deps_prefix", "Note: including file:")
+    n.rule(name="host_masm", command=f"{masm} $asflags /c /Fo$out $in", description="MASM $out")
+    n.rule(
+        name="delink_split",
+        command=(
+            "$python tools/run_delink_split.py --input $in --out-dir $out_dir "
+            "--symbols $symbols --splits $splits --config-dir $config_dir "
+            "--objects $objects --binary $binary"
+        ),
+        description="DELINK $in",
+    )
+    n.newline()
+
+    binaries = ["cl", "c1", "c1xx", "c2", "link", "ml"]
+    split_outputs = []
+    for binary in binaries:
+        source = Path("orig") / config.version / f"{binary}.{'dll' if binary.startswith('c') and binary != 'cl' else 'exe'}"
+        out_dir = build_path / binary
+        outputs = [out_dir / "symbols.txt", out_dir / "splits.txt"]
+        n.build(
+            outputs=outputs,
+            rule="delink_split",
+            inputs=source,
+            implicit=[
+                Path("config") / config.version / binary / "symbols.txt",
+                Path("config") / config.version / binary / "splits.txt",
+                Path("config") / config.version / binary / "objects.json",
+            ],
+            variables={
+                "out_dir": out_dir,
+                "symbols": Path("config") / config.version / binary / "symbols.txt",
+                "splits": Path("config") / config.version / binary / "splits.txt",
+                "config_dir": Path("config") / config.version / binary,
+                "objects": Path("config") / config.version / binary / "objects.json",
+                "binary": binary,
+            },
+        )
+        split_outputs.extend(outputs)
+
+    compiled = []
+    for obj in objects.values():
+        if obj.src_path is None or not obj.src_path.exists():
+            continue
+        flags = make_flags_str(obj.options["cflags"] + obj.options["extra_cflags"])
+        rule = "host_masm" if file_is_asm(obj.src_path) else "msvc"
+        variables = {"cflags": flags} if rule == "msvc" else {"asflags": make_flags_str(config.asflags or [])}
+        n.build(outputs=obj.src_obj_path, rule=rule, inputs=obj.src_path, variables=variables)
+        compiled.append(obj.src_obj_path)
+
+    n.build(outputs="split", rule="phony", inputs=split_outputs)
+    n.build(outputs="all", rule="phony", inputs=compiled + ["split"])
+    report_path = build_path / "report.json"
+    n.rule(
+        name="report",
+        command=f"{objdiff} report generate $objdiff_report_args -o $out",
+        description="REPORT",
+    )
+    n.build(
+        outputs=report_path,
+        rule="report",
+        implicit=[objdiff, "objdiff.json", *split_outputs, *compiled],
+        order_only="all",
+    )
+    n.build(outputs="report", rule="phony", inputs=report_path)
+    n.rule(
+        name="progress",
+        command="$python configure.py progress",
+        description="PROGRESS",
+    )
+    n.build(
+        outputs="progress",
+        rule="progress",
+        implicit=[report_path, "configure.py"],
+    )
+    n.default("progress")
+    Path("build.ninja").write_text(out.getvalue(), encoding="utf-8")
+
+
+def generate_msvc_objdiff(config: ProjectConfig, objects: Dict[str, Object]) -> None:
+    """Write a first binary-prefixed objdiff unit manifest."""
+    units = []
+    for obj in objects.values():
+        binary = obj.options["lib"]
+        target_name = Path(obj.name)
+        source_name = Path(obj.options["source"])
+        if target_name.parts and target_name.parts[0] == binary:
+            target_name = Path(*target_name.parts[1:])
+        target_name = Path(target_name.name)
+        if source_name.parts and source_name.parts[0] == binary:
+            source_name = Path(*source_name.parts[1:])
+        unit = {
+            "name": (Path(binary) / source_name).as_posix(),
+            "target_path": (config.out_path() / binary / target_name).as_posix(),
+            "base_path": obj.src_obj_path.as_posix(),
+            "metadata": {"source_path": obj.src_path.as_posix(), "progress_categories": [binary]},
+            "symbol_mappings": None,
+        }
+        status = obj.options.get("status", "MISSING")
+        if status != "MISSING":
+            unit["complete"] = status == "Matching"
+        units.append(unit)
+    data = {
+        "min_version": "2.0.0-beta.5",
+        "custom_make": "ninja",
+        "build_target": False,
+        "units": units,
+        "progress_categories": [
+            {"id": binary, "name": binary} for binary in ["cl", "c1", "c1xx", "c2", "link", "ml", "mspdb100"]
+        ],
+    }
+    Path("objdiff.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def generate_msvc_compile_commands(config: ProjectConfig, objects: Dict[str, Object]) -> None:
+    """Write a clangd compilation database for the native MSVC sources."""
+    compiler = config.compilers() / "cl.exe"
+    commands = []
+    for obj in objects.values():
+        if obj.src_path is None or obj.src_obj_path is None or not obj.src_path.exists():
+            continue
+        if not file_is_c_cpp(obj.src_path):
+            continue
+        flags = obj.options["cflags"] + obj.options["extra_cflags"]
+        commands.append({
+            "directory": str(Path.cwd()),
+            "arguments": [
+                str(compiler),
+                *flags,
+                f"/Fo{obj.src_obj_path}",
+                str(obj.src_path),
+            ],
+            "file": str(obj.src_path),
+            "output": str(obj.src_obj_path),
+        })
+    Path("compile_commands.json").write_text(json.dumps(commands, indent=2) + "\n", encoding="utf-8")
 
 
 # Generate build.ninja
@@ -807,6 +999,26 @@ def generate_build_ninja(
     )
     n.newline()
 
+    # Native host MSVC rules used by the x86 compiler-binary project.
+    msvc = compilers / "cl.exe"
+    n.comment("Host MSVC build (cl.exe)")
+    n.variable("msvc_deps_prefix", "Note: including file:")
+    n.rule(
+        name="msvc",
+        command=f"{wrapper_cmd}{msvc} $cflags /showIncludes /Fo$out $in",
+        description="MSVC $out",
+        deps="msvc",
+    )
+    n.newline()
+    host_masm = compilers / "ml.exe"
+    n.comment("Host MASM build (ml.exe)")
+    n.rule(
+        name="host_masm",
+        command=f"{wrapper_cmd}{host_masm} $asflags /c /Fo$out $in",
+        description="MASM $out",
+    )
+    n.newline()
+
     if len(config.custom_build_rules or {}) > 0:
         n.comment("Custom project build rules (pre/post-processing)")
     for rule in config.custom_build_rules or {}:
@@ -1034,6 +1246,10 @@ def generate_build_ninja(
                 "basedir": os.path.dirname(obj.src_obj_path),
                 "basefile": obj.src_obj_path.with_suffix(""),
             }
+            if config.compiler_kind == "msvc":
+                build_rule = "msvc"
+                build_implcit = [msvc, wrapper_implicit]
+                variables = {"cflags": cflags_str}
 
             if obj.options["shift_jis"] and obj.options["extab_padding"] is not None:
                 build_rule = "mwcc_sjis_extab"
@@ -1112,7 +1328,7 @@ def generate_build_ninja(
             n.comment(f"{obj.name}: {lib_name} (linked {obj.completed})")
             n.build(
                 outputs=obj_path,
-                rule="as",
+                rule="host_masm" if config.compiler_kind == "msvc" else "as",
                 inputs=src_path,
                 variables={"asflags": asflags_str},
                 implicit=gnu_as_implicit,

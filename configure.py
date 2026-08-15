@@ -13,6 +13,7 @@
 ###
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -29,7 +30,7 @@ from tools.project import (
 # Game versions
 DEFAULT_VERSION = 0
 VERSIONS = [
-    "GAMEID",  # 0
+    "16.00.11886.00",  # 0
 ]
 
 parser = argparse.ArgumentParser()
@@ -249,7 +250,6 @@ cflags_rel = [
 
 config.linker_version = "GC/1.3.2"
 
-
 # Helper function for Dolphin libraries
 def DolphinLib(lib_name: str, objects: List[Object]) -> Dict[str, Any]:
     return {
@@ -297,6 +297,48 @@ config.libs = [
     },
 ]
 
+# The host compiler project uses the shared categories file plus one
+# objects.json per target binary. Keep this after the template defaults so the
+# M2 configuration is the active one for the new version.
+if config.version == "16.00.11886.00":
+    version_dir = Path("config") / config.version
+    config.compiler_kind = "msvc"
+    config.compilers_path = Path("Compiler")
+    config.compilers_tag = None
+    config.linker_version = "X360/16.00.11886.00"
+    with (version_dir / "config.json").open(encoding="utf-8") as f:
+        compiler_config = json.load(f)
+    config.progress_categories = [
+        ProgressCategory(item["id"], item["name"])
+        for item in compiler_config.get("progress_categories", [])
+    ]
+    config.libs = []
+    cflags = compiler_config.get("cflags", {})
+    for binary_dir in sorted(version_dir.iterdir()):
+        objects_path = binary_dir / "objects.json"
+        if not objects_path.is_file():
+            continue
+        with objects_path.open(encoding="utf-8") as f:
+            binary_config = json.load(f)
+        for library in binary_config.values():
+            flag_key = library.get("cflags", "base")
+            flags = list(cflags.get(flag_key, cflags.get("base", [])))
+            objects = []
+            for source, status in library.get("objects", {}).items():
+                if isinstance(status, dict):
+                    status = status.get("status", "MISSING")
+                completed = status in ("Matching", "Equivalent", "COMPLETE")
+                source_path = Path(source)
+                object_name = str(source_path.with_suffix(".obj"))
+                objects.append(Object(completed, object_name, source=source, cflags=flags, status=status))
+            config.libs.append({
+                "lib": binary_dir.name,
+                "mw_version": library.get("mw_version", config.linker_version),
+                "cflags": flags,
+                "progress_category": library.get("progress_category", binary_dir.name),
+                "objects": objects,
+            })
+
 
 # Optional callback to adjust link order. This can be used to add, remove, or reorder objects.
 # This is called once per module, with the module ID and the current link order.
@@ -318,10 +360,11 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
 
 # Optional extra categories for progress tracking
 # Adjust as desired for your project
-config.progress_categories = [
-    ProgressCategory("game", "Game Code"),
-    ProgressCategory("sdk", "SDK Code"),
-]
+if config.version != "16.00.11886.00":
+    config.progress_categories = [
+        ProgressCategory("game", "Game Code"),
+        ProgressCategory("sdk", "SDK Code"),
+    ]
 config.progress_each_module = args.verbose
 # Optional extra arguments to `objdiff-cli report generate`
 config.progress_report_args = [

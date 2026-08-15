@@ -1,0 +1,44 @@
+{
+    "progress_categories": [
+        {
+            "id": "cl",
+            "name": "cl.exe"
+        },
+        {
+            "id": "c1",
+            "name": "c1.dll"
+        },
+        {
+            "id": "c1xx",
+            "name": "c1xx.dll"
+        },
+        {
+            "id": "c2",
+            "name": "c2.dll"
+        },
+        {
+            "id": "link",
+            "name": "link.exe"
+        },
+        {
+            "id": "ml",
+            "name": "ml.exe"
+        },
+        {
+            "id": "mspdb100",
+            "name": "mspdb100.dll"
+        }
+    ],
+    "cflags": {
+        "base": [
+            "/nologo",
+            "/c",
+            "/O1",
+            "/MD",
+            "/ICompiler/include/",
+            "/Isrc",
+            "/Icl",
+            "/Ic1"
+        ]
+    }
+}

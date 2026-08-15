@@ -1,0 +1,33 @@
+# Shared delink splitter configuration. Each module owns its editable
+# symbols.txt and splits.txt under this version directory.
+modules:
+  - name: cl
+    object: orig/16.00.11886.00/cl.exe
+    symbols: config/16.00.11886.00/cl/symbols.txt
+    splits: config/16.00.11886.00/cl/splits.txt
+    autosplit: true
+  - name: c1
+    object: orig/16.00.11886.00/c1.dll
+    symbols: config/16.00.11886.00/c1/symbols.txt
+    splits: config/16.00.11886.00/c1/splits.txt
+    autosplit: true
+  - name: c1xx
+    object: orig/16.00.11886.00/c1xx.dll
+    symbols: config/16.00.11886.00/c1xx/symbols.txt
+    splits: config/16.00.11886.00/c1xx/splits.txt
+    autosplit: true
+  - name: c2
+    object: orig/16.00.11886.00/c2.dll
+    symbols: config/16.00.11886.00/c2/symbols.txt
+    splits: config/16.00.11886.00/c2/splits.txt
+    autosplit: true
+  - name: link
+    object: orig/16.00.11886.00/link.exe
+    symbols: config/16.00.11886.00/link/symbols.txt
+    splits: config/16.00.11886.00/link/splits.txt
+    autosplit: true
+  - name: ml
+    object: orig/16.00.11886.00/ml.exe
+    symbols: config/16.00.11886.00/ml/symbols.txt
+    splits: config/16.00.11886.00/ml/splits.txt
+    autosplit: true
