@@ -2,9 +2,10 @@
     "cl": {
         "progress_category": "cl",
         "mw_version": "X360/16.00.11886.00",
-        "cflags": "base",
-            "objects": {
-            "cl/xnew.c": "NonMatching"
+        "cflags": "cl",
+        "objects": {
+            "cl/xnew.cpp": "Matching",
+            "cl/dos.cpp": "NonMatching"
         }
     }
 }

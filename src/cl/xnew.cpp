@@ -20,7 +20,6 @@ void xfree(void* ptr) {
 
 wchar_t* xstrdup(const wchar_t* source) {
     wchar_t* cpy;
-
     if (!source)
         return NULL;
 

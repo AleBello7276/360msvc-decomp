@@ -30,12 +30,14 @@
         }
     ],
     "cflags": {
-        "base": [
+        "cl": [
             "/nologo",
             "/c",
             "/O1",
             "/MD",
+            "/Zc:wchar_t-",
             "/ICompiler/include/",
+            "/ICompiler/Windows/v7.0A/include",
             "/Isrc",
             "/Icl",
             "/Ic1"
