@@ -1,11 +1,14 @@
-# `symbols.txt`
+# `symbols.csv`
 
 This file contains all symbols for a module, one per line.
 
-Example line:
+Example file:
 
 ```
-__dt__13mDoExt_bckAnmFv = .text:0x800DD2EC; // type:function size:0x5C scope:global align:4
+Address,Size,Type,Symbol
+0x00413911,0x1C,func,xnew
+0x00418034,0x4,data,?RedirStderr@@3HA
+0x004010BC,0x0,imp,__imp__SetConsoleCtrlHandler@8
 ```
 
 ## Format
@@ -14,25 +17,72 @@ Numbers can be written as decimal or hexadecimal. Hexadecimal numbers must be pr
 
 Comment lines starting with `//` or `#` are permitted, but are currently **not** preserved when updating the file.
 
+```text
+Address,Size,Type,Symbol
 ```
-symbol_name = section:address; // [attributes]
+
+- `Address` - Absolute symbol address, written as decimal or hexadecimal.
+- `Size` - Symbol size in bytes, written as decimal or hexadecimal.
+- `Type` - One of `func`, `data`, or `imp`.
+- `Symbol` - The symbol name. C++ names and exact COFF import names are allowed.
+
+There are no comment attributes. Calling conventions, scope, data hints, and
+alignment are not represented in this format.
+
+## x86 MSVC Symbols
+
+For the x86 host compiler, keep C names undecorated in `symbols.txt`. Delink
+applies the compiler's COFF decoration when it emits an object file.
+
+```text
+0x00413911,0x1C,func,xnew
 ```
 
-- `symbol_name` - The name of the symbol. (For C++, this is the mangled name, e.g. `__dt__13mDoExt_bckAnmFv`)
-- `section` - The section the symbol is in.
-- `address` - The address of the symbol. For DOLs, this is the absolute address (e.g. `0x80001234`). For RELs, this is the section-relative address (e.g. `0x1234`).
+The emitted COFF symbol is `_xnew`, which matches the name produced by x86
+MSVC for a cdecl C function. cdecl is the default when `cc:` is omitted.
 
-### Attributes
+### Calling Conventions
 
-All attributes are optional, and are separated by spaces.
+Calling-convention attributes are intentionally removed. Store the exact
+desired emitted symbol in the `Symbol` field when decoration matters. For
+example:
 
-- `type:` The symbol type. `function`, `object`, or `label`.
-- `size:` The size of the symbol.
-- `scope:` The symbol's visibility. `global` (default), `local` or `weak`.
-- `align:` The symbol's alignment.
-- `data:` The data type used when writing disassembly. `byte`, `2byte`, `4byte`, `8byte`, `float`, `double`, `int`, `short`, `string`, `wstring`, `string_table`, `wstring_table`, `sjis`, or `sjis_table`.
-- `hidden` Marked as "hidden" in the generated object. (Only used for extab)
-- `force_active` Marked as ["exported"](comment_section.md) in the generated object, and added to `FORCEACTIVE` in the generated `ldscript.lcf`. Prevents the symbol from being deadstripped.
-- `noreloc` Prevents the _contents_ of the symbol from being interpreted as addresses. Used for objects containing data that look like pointers, but aren't.
-- `noexport` When `export_all` is enabled, this excludes the symbol from being exported. Used for symbols that are affected by linker `-code_merging`.
-- `stripped` Indicates a symbol that was stripped by the linker. Used for symbols that affect the [common BSS inflation bug](common_bss.md), despite not existing in the final binary.
+```text
+0x00413188,0x4F,func,_NT_handling_function@4
+```
+
+### Import Overrides
+
+PE import names do not contain the source calling convention, so an import
+whose compiler declaration is stdcall can be overridden by its IAT slot:
+
+```text
+0x004010BC,0x0,imp,__imp__SetConsoleCtrlHandler@8
+```
+
+Delink emits the corresponding import-pointer symbol:
+
+```text
+__imp__SetConsoleCtrlHandler@8
+```
+
+The `imp` symbol is emitted exactly as written. This is required when the
+target uses a decorated import but the PE import table only exposes the
+undecorated API name.
+
+### Adding and Correcting Symbols
+
+Existing function and object entries can be renamed or corrected by changing
+the left-hand name or the `size:` attribute. A new `type:function` entry adds
+an inferred function to the emitted object. A new `type:object` entry adds a
+data symbol to relocation resolution; assign its byte range to a TU in
+`splits.txt` when the object itself must contain that data.
+
+After editing this file, normal Ninja builds automatically rerun delink and
+propagate the changes. A function or object is emitted only when its range is
+assigned to a TU in `splits.txt`; symbols not assigned to a split are not
+emitted as fallback per-function objects. The explicit analysis target is also available:
+
+```text
+ninja analyze
+```

@@ -6,10 +6,19 @@ Diagnostics:
     - "attribute_not_supported_on_arch"
     - "use_of_tag_name_without_tag"
     - "builtin-macro-redefined"  
+    - "invalid-token-paste"
 
 CompileFlags:
   Add:
-    - "--driver-mode=cl"
-    - "-fms-extensions"
-    - "-fms-compatibility"
-    - -fno-wchar
+    - --driver-mode=cl
+    - -fms-extensions
+    - -fms-compatibility
+    - -I./Compiler/include
+    - "-IC:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/Include"
+    - --target=i686-pc-windows-msvc
+  Remove:
+    - -IC:/Program Files (x86)/Windows Kits/10/include/10.0.26100.0/*
+
+Index:
+  Background:
+    Skip: ["Compiler/Windows/**", "Compiler/include/**"]

@@ -35,7 +35,7 @@ def main() -> None:
     args = parser.parse_args()
 
     args.config_dir.mkdir(parents=True, exist_ok=True)
-    for name in ("symbols.txt", "splits.txt"):
+    for name in ("symbols.csv", "splits.txt"):
         source = args.build_dir / name
         destination = args.config_dir / name
         if source.is_file() and not destination.exists():

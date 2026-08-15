@@ -525,19 +525,19 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
     for binary in binaries:
         source = Path("orig") / config.version / f"{binary}.{'dll' if binary.startswith('c') and binary != 'cl' else 'exe'}"
         out_dir = build_path / binary
-        outputs = [out_dir / "symbols.txt", out_dir / "splits.txt"]
+        outputs = [out_dir / "symbols.csv", out_dir / "splits.txt"]
         n.build(
             outputs=outputs,
             rule="delink_split",
             inputs=source,
             implicit=[
-                Path("config") / config.version / binary / "symbols.txt",
+                Path("config") / config.version / binary / "symbols.csv",
                 Path("config") / config.version / binary / "splits.txt",
                 Path("config") / config.version / binary / "objects.json",
             ],
             variables={
                 "out_dir": out_dir,
-                "symbols": Path("config") / config.version / binary / "symbols.txt",
+                "symbols": Path("config") / config.version / binary / "symbols.csv",
                 "splits": Path("config") / config.version / binary / "splits.txt",
                 "config_dir": Path("config") / config.version / binary,
                 "objects": Path("config") / config.version / binary / "objects.json",
@@ -557,6 +557,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
         compiled.append(obj.src_obj_path)
 
     n.build(outputs="split", rule="phony", inputs=split_outputs)
+    n.build(outputs="analyze", rule="phony", inputs=split_outputs)
     n.build(outputs="all", rule="phony", inputs=compiled + ["split"])
     report_path = build_path / "report.json"
     n.rule(
@@ -622,7 +623,7 @@ def generate_msvc_objdiff(config: ProjectConfig, objects: Dict[str, Object]) -> 
 
 def generate_msvc_compile_commands(config: ProjectConfig, objects: Dict[str, Object]) -> None:
     """Write a clangd compilation database for the native MSVC sources."""
-    compiler = config.compilers() / "cl.exe"
+    compiler = Path("clang-cl.exe")
     commands = []
     for obj in objects.values():
         if obj.src_path is None or obj.src_obj_path is None or not obj.src_path.exists():

@@ -1,2 +1,2 @@
-# The shared splitter config is config.yml. Edit symbols.txt and splits.txt
+# The shared splitter config is config.yml. Edit symbols.csv and splits.txt
 # inside the matching binary directory after running delink analysis.
