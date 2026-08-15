@@ -10,7 +10,8 @@ cl/xnew.cpp:
 
 
 cl/dos.cpp:
-    .text start:0x00412e07 end:0x004131fb
+    .text start:0x00412dc3 end:0x004131fb
     .rdata start:0x00409990 end:0x004099de
+    .rdata start:0x004098c0 end:0x00409902
     .bss  start:0x0041a760 end:0x0041a764 
     .bss  start:0x0041a768 end:0x0041a76c
