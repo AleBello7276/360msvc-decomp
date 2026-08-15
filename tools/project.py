@@ -506,6 +506,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
 
     compiler = config.compilers() / "cl.exe"
     masm = config.compilers() / "ml.exe"
+    delink = build_tools_path / f"delink{EXE}"
     n.rule(name="msvc", command=f"{compiler} $cflags /showIncludes /Fo$out $in", description="MSVC $out", deps="msvc")
     n.variable("msvc_deps_prefix", "Note: including file:")
     n.rule(name="host_masm", command=f"{masm} $asflags /c /Fo$out $in", description="MASM $out")
@@ -514,7 +515,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
         command=(
             "$python tools/run_delink_split.py --input $in --out-dir $out_dir "
             "--symbols $symbols --splits $splits --config-dir $config_dir "
-            "--objects $objects --binary $binary"
+            "--objects $objects --binary $binary --delink $delink"
         ),
         description="DELINK $in",
     )
@@ -534,6 +535,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
                 Path("config") / config.version / binary / "symbols.csv",
                 Path("config") / config.version / binary / "splits.txt",
                 Path("config") / config.version / binary / "objects.json",
+                delink,
             ],
             variables={
                 "out_dir": out_dir,
@@ -542,6 +544,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
                 "config_dir": Path("config") / config.version / binary,
                 "objects": Path("config") / config.version / binary / "objects.json",
                 "binary": binary,
+                "delink": delink,
             },
         )
         split_outputs.extend(outputs)

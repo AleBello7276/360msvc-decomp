@@ -1,5 +1,5 @@
 # Shared delink splitter configuration. Each module owns its editable
-# symbols.txt and splits.txt under this version directory.
+# symbols.csv and splits.txt under this version directory.
 modules:
   - name: cl
     object: orig/16.00.11886.00/cl.exe

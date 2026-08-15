@@ -19,6 +19,7 @@ def main() -> None:
     parser.add_argument("--config-dir", type=Path, required=True)
     parser.add_argument("--objects", type=Path, required=True)
     parser.add_argument("--binary", required=True)
+    parser.add_argument("--delink", type=Path, required=True)
     args = parser.parse_args()
 
     if args.out_dir.exists():
@@ -27,8 +28,7 @@ def main() -> None:
 
     subprocess.run(
         [
-            "cargo", "run", "--manifest-path", "../delink/Cargo.toml", "--bin", "delink",
-            "--", "pe-split", str(args.input), "--outdir", str(args.out_dir),
+            str(args.delink), "pe-split", str(args.input), "--outdir", str(args.out_dir),
             "--symbols", str(args.symbols), "--splits", str(args.splits),
         ],
         check=True,

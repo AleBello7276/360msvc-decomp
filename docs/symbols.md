@@ -31,7 +31,7 @@ alignment are not represented in this format.
 
 ## x86 MSVC Symbols
 
-For the x86 host compiler, keep C names undecorated in `symbols.txt`. Delink
+For the x86 host compiler, keep C names undecorated in `symbols.csv`. Delink
 applies the compiler's COFF decoration when it emits an object file.
 
 ```text
@@ -39,7 +39,7 @@ applies the compiler's COFF decoration when it emits an object file.
 ```
 
 The emitted COFF symbol is `_xnew`, which matches the name produced by x86
-MSVC for a cdecl C function. cdecl is the default when `cc:` is omitted.
+MSVC for a cdecl C function. Ordinary C names use cdecl decoration by default.
 
 ### Calling Conventions
 
@@ -73,10 +73,10 @@ undecorated API name.
 ### Adding and Correcting Symbols
 
 Existing function and object entries can be renamed or corrected by changing
-the left-hand name or the `size:` attribute. A new `type:function` entry adds
-an inferred function to the emitted object. A new `type:object` entry adds a
-data symbol to relocation resolution; assign its byte range to a TU in
-`splits.txt` when the object itself must contain that data.
+the `Size` or `Symbol` CSV field. A new `func` row adds an inferred function to
+the emitted object. A new `data` row adds a data symbol to relocation
+resolution; assign its byte range to a TU in `splits.txt` when the object itself
+must contain that data.
 
 After editing this file, normal Ninja builds automatically rerun delink and
 propagate the changes. A function or object is emitted only when its range is
