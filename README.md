@@ -10,7 +10,7 @@ get the following:
 - rust (to compile delink), ninja, python, windows or a way to run the compiler.
 
 
-build delink with:
+build this [delink](https://github.com/AleBello7276/delink) with:
 
 ```text
 cargo build --release --bin delink
