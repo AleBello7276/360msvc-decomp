@@ -36,6 +36,7 @@
             "/O1",
             "/MD",
             "/Zc:wchar_t-",
+            "/GS",
             "/ICompiler/include/",
             "/ICompiler/Windows/v7.0A/include",
             "/Isrc",
