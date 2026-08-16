@@ -5,7 +5,8 @@
         "cflags": "cl",
         "objects": {
             "cl/xnew.cpp": "Matching",
-            "cl/dos.cpp": "NonMatching"
+            "cl/dos.cpp": "NonMatching",
+            "cl/util.cpp": "NonMatching"
         }
     }
 }

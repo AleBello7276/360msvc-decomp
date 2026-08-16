@@ -15,3 +15,7 @@ cl/dos.cpp:
     .rdata start:0x004098c0 end:0x00409902
     .bss  start:0x0041a760 end:0x0041a764 
     .bss  start:0x0041a768 end:0x0041a76c
+
+cl/util.cpp:
+    .text start:0x00411e21 end:0x00411f70
+    .text start:0x00411bfa end:0x00411dc2
