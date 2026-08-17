@@ -20,3 +20,4 @@ cl/util.cpp:
     .text start:0x00411e21 end:0x00411f70
     .text start:0x00411bfa end:0x00411dc2
     .rdata start:0x00408b80 end:0x00408ba4
+    .rdata start:0x004097a8 end:0x004097f8

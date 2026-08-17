@@ -1,3 +1,4 @@
+#include "clmain.h"
 #include "util.h"
 #include <cstdint>
 #include <cstring>
@@ -100,7 +101,7 @@ BOOL IsRunningUnderIDE(PHANDLE h) {
 }
 
 BOOL IsOutputToConsole(HANDLE h) {
-    // is h char file
+    // is *h* char file
     if ((GetFileType(h) & ~FILE_TYPE_REMOTE) != FILE_TYPE_CHAR)
         return FALSE;
 
@@ -113,4 +114,15 @@ wchar_t* gobblewhite(wchar_t* in) {
         in++;
 
     return in;
+}
+
+wchar_t* append(wchar_t* dst, size_t size, const wchar_t* appendee) {
+    if (dst) {
+        if (appendee)
+            wcscpy_s(dst, size, appendee);
+        return &dst[wcslen(dst)];
+    }
+
+#line 101 "e:\\bt\\278379\\vctools\\compiler\\cl\\util.c"
+    internal(__FILEW__, __LINE__);
 }
