@@ -39,6 +39,7 @@
             "/GS",
             "/Oi",
             "/TP",
+            "/Ob1",
             "/ICompiler/include/",
             "/ICompiler/Windows/v7.0A/include",
             "/Isrc",

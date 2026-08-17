@@ -6,6 +6,7 @@ Sections:
 
 cl/xnew.c:
     .text  start:0x00413911 end:0x00413961
+    .text start:0x0040a2b9 end:0x0040a2f7
     .rdata start:0x00409a70 end:0x00409ac0
 
 

@@ -7,7 +7,7 @@ Diagnostics:
     - "use_of_tag_name_without_tag"
     - "builtin-macro-redefined"  
     - "invalid-token-paste"
-
+    - "inline-new-delete"
 CompileFlags:
   Add:
     - --driver-mode=cl
