@@ -1,10 +1,12 @@
 #pragma once
 
+#include "CodeAnalysis/sourceannotations.h"
 #include "types.h"
 
 #define DONE_4 4
 
 #define CMD_ERR_0x1f67 0x1f67
+#define CMD_ERR_8030 8030
 
 /*
     strqlen (string quoted (!?!?) lenght)
@@ -22,5 +24,17 @@ BOOL IsOutputToConsole(HANDLE h);
 /* skips white characters (i love this name lol) */
 wchar_t* gobblewhite(wchar_t* in);
 
+/**/
+wchar_t* concat(wchar_t* dst, size_t size, const wchar_t* concatee);
+
+/**/
+wchar_t* concatmeta(wchar_t* dst, size_t size, const wchar_t* concatee);
+
+/**/
+wchar_t* append(wchar_t* dst, size_t size, const wchar_t* appendee);
+
 NORETURN void done(INT code);
+
 void cmderr(DWORD error, ...);
+
+wchar_t** sztoszv(wchar_t*, BOOL);

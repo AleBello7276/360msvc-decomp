@@ -21,3 +21,9 @@ cl/util.cpp:
     .text start:0x00411bfa end:0x00411dc2
     .rdata start:0x00408b80 end:0x00408ba4
     .rdata start:0x004097a8 end:0x004097f8
+
+cl/clmain.cpp:
+    .text start:0x0040f09d end:0x0040f777
+    .text start:0x0040a7fe end:0x0040a814
+    .text start:0x0040ec80 end:0x0040ec9f
+    .data start:0x00418030 end:0x00418038

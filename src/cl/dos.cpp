@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <wchar.h>
 
+#undef __FILEW__
+#define __FILEW__ L"e:\\bt\\278379\\vctools\\compiler\\cl\\dos.c"
+
 #define STDOUT 1
 #define STDERR 2
 
@@ -36,7 +39,7 @@ INT ExecuteCleanupPass(passinfo_s* passinfo_, LPCWSTR module_name) {
 
 int execute(int param_1, passinfo_s* passinfo_, LPCWSTR lib, LPCWSTR param_4, LPCWSTR** param_5) {
     if (*param_5 == nullptr) {
-#line 245 "e:\\bt\\278379\\vctools\\compiler\\cl\\dos.c"
+#line 245
         internal(__FILEW__, __LINE__);
     }
 
@@ -73,7 +76,7 @@ BOOL WINAPI NT_handling_function(DWORD CtrlType) {
         if (currPassinfo->mAbortFunc) {
             currPassinfo->mAbortFunc(ABORT_CODE_2);
         } else {
-#line 474 "e:\\bt\\278379\\vctools\\compiler\\cl\\dos.c"
+#line 474
             internal(__FILEW__, __LINE__);
         }
     }

@@ -1,8 +1,12 @@
+
 #include "clmain.h"
 #include "util.h"
 #include <cstdint>
 #include <cstring>
 #include <wchar.h>
+
+#undef __FILEW__
+#define __FILEW__ L"e:\\bt\\278379\\vctools\\compiler\\cl\\util.c"
 
 int strqlen(const wchar_t* s) {
     UINT backslashes = 0;
@@ -85,8 +89,6 @@ wchar_t* strqcpy(wchar_t* dst, const wchar_t* src) {
     return dst;
 }
 
-wchar_t* append(wchar_t* dst, size_t src_len, const wchar_t* src);
-
 BOOL IsRunningUnderIDE(PHANDLE h) {
     const size_t SIZE = 64;
     WCHAR value[SIZE];
@@ -116,6 +118,62 @@ wchar_t* gobblewhite(wchar_t* in) {
     return in;
 }
 
+wchar_t* concat(wchar_t* dst, size_t size, const wchar_t* concatee) {
+    if (dst) {
+        if (concatee)
+            wcscat_s(dst, size, concatee);
+        return &dst[wcslen(dst)];
+    }
+
+#line 54
+    internal(__FILEW__, __LINE__);
+}
+
+wchar_t* concatmeta(wchar_t* dst, size_t capacity, const wchar_t* src) {
+    wchar_t* out;
+    size_t len;
+
+    if (dst == nullptr || capacity == 0) {
+#line 65
+        internal(__FILEW__, __LINE__);
+    }
+
+    len = wcslen(dst);
+
+    // not enough space
+    if (capacity <= len) {
+#line 71
+        internal(__FILEW__, __LINE__);
+    }
+
+    out = dst + len;
+    capacity -= len;
+
+    if (src != NULL) {
+        for (; *src != L'\0'; ++src) {
+            if (capacity == 0)
+                break;
+
+            *out++ = *src;
+            --capacity;
+
+            // '%' doubles it. idk why
+            if (*src == L'%' && capacity != 0) {
+                *out++ = L'%';
+                --capacity;
+            }
+        }
+
+        if (capacity == 0) {
+#line 89
+            internal(__FILEW__, __LINE__);
+        }
+
+        *out = L'\0';
+    }
+    return out;
+}
+
 wchar_t* append(wchar_t* dst, size_t size, const wchar_t* appendee) {
     if (dst) {
         if (appendee)
@@ -123,6 +181,6 @@ wchar_t* append(wchar_t* dst, size_t size, const wchar_t* appendee) {
         return &dst[wcslen(dst)];
     }
 
-#line 101 "e:\\bt\\278379\\vctools\\compiler\\cl\\util.c"
+#line 101
     internal(__FILEW__, __LINE__);
 }

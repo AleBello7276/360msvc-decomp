@@ -2,11 +2,14 @@
 
 #include "clmain.h"
 
+#undef __FILEW__
+#define __FILEW__ L"e:\\bt\\278379\\vctools\\compiler\\cl\\xnew.c"
+
 void* xnew(size_t size) {
     void* p = malloc(size);
 
     if (p == 0) {
-#line 90 "e:\\bt\\278379\\vctools\\compiler\\cl\\xnew.c"
+#line 90
         internal(__FILEW__, __LINE__);
     }
 
@@ -25,7 +28,7 @@ wchar_t* xstrdup(const wchar_t* source) {
 
     cpy = _wcsdup(source);
     if (!cpy)
-#line 108 "e:\\bt\\278379\\vctools\\compiler\\cl\\xnew.c"
+#line 108
         internal(__FILEW__, __LINE__);
 
     return cpy;
