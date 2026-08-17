@@ -16,6 +16,9 @@ int strqlen(const wchar_t* s);
 /* check if compiler is running in visual studio */
 BOOL IsRunningUnderIDE(void**);
 
+/**/
+BOOL IsOutputToConsole(HANDLE h);
+
 /* skips white characters (i love this name lol) */
 wchar_t* gobblewhite(wchar_t* in);
 

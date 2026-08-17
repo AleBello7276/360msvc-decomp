@@ -86,7 +86,18 @@ wchar_t* strqcpy(wchar_t* dst, const wchar_t* src) {
 
 wchar_t* append(wchar_t* dst, size_t src_len, const wchar_t* src);
 
-BOOL IsRunningUnderIDE(void**);
+BOOL IsRunningUnderIDE(PHANDLE h) {
+    const size_t SIZE = 64;
+    WCHAR value[SIZE];
+
+    if (GetEnvironmentVariableW(L"VS_UNICODE_OUTPUT", NULL, NULL)) {
+        GetEnvironmentVariableW(L"VS_UNICODE_OUTPUT", value, SIZE);
+
+        *h = (HANDLE)_wtoi(value);
+        return TRUE;
+    }
+    return FALSE;
+}
 
 BOOL IsOutputToConsole(HANDLE h) {
     // is h char file
