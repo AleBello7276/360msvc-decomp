@@ -4,10 +4,10 @@
         "mw_version": "X360/16.00.11886.00",
         "cflags": "cl",
         "objects": {
-            "cl/xnew.cpp": "Matching",
-            "cl/dos.cpp": "NonMatching",
-            "cl/util.cpp": "NonMatching",
-            "cl/clmain.cpp": "NonMatching"
+            "cl/xnew.c": "Matching",
+            "cl/dos.c": "NonMatching",
+            "cl/util.c": "NonMatching",
+            "cl/clmain.c": "NonMatching"
         }
     }
 }

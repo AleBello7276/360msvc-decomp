@@ -4,25 +4,25 @@ Sections:
     .data      type:data align:16
     .bss       type:bss align:16
 
-cl/xnew.cpp:
+cl/xnew.c:
     .text  start:0x00413911 end:0x00413961
     .rdata start:0x00409a70 end:0x00409ac0
 
 
-cl/dos.cpp:
+cl/dos.c:
     .text start:0x00412dc3 end:0x004131fb
     .rdata start:0x00409990 end:0x004099de
     .rdata start:0x004098c0 end:0x00409902
     .bss  start:0x0041a760 end:0x0041a764 
     .bss  start:0x0041a768 end:0x0041a76c
 
-cl/util.cpp:
+cl/util.c:
     .text start:0x00411e21 end:0x00411f70
     .text start:0x00411bfa end:0x00411dc2
     .rdata start:0x00408b80 end:0x00408ba4
     .rdata start:0x004097a8 end:0x004097f8
 
-cl/clmain.cpp:
+cl/clmain.c:
     .text start:0x0040f09d end:0x0040f777
     .text start:0x0040a7fe end:0x0040a814
     .text start:0x0040ec80 end:0x0040ec9f

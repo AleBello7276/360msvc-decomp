@@ -38,6 +38,7 @@
             "/Zc:wchar_t-",
             "/GS",
             "/Oi",
+            "/TP",
             "/ICompiler/include/",
             "/ICompiler/Windows/v7.0A/include",
             "/Isrc",
