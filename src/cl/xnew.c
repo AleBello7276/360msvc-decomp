@@ -9,7 +9,7 @@
 void* xnew(size_t size) {
     void* p = malloc(size);
 
-    if (p == 0) {
+    if (!p) {
 #line 90
         internal(__FILEW__, __LINE__);
     }

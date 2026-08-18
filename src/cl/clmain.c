@@ -1,8 +1,8 @@
 #include "CodeAnalysis/sourceannotations.h"
 #include "clmain.h"
 
+#include "clui/loadui.h"
 #include "dos.h"
-#include "loadui.h"
 #include "mpcl.h"
 #include "util.h"
 #include <clocale>
@@ -27,7 +27,7 @@ void build_context(const wchar_t* path, context_s* ctx) {
     }
 }
 
-int _wmain(int _Argc, wchar_t** _Argv, wchar_t** _Env) {
+int wmain(int _Argc, wchar_t** _Argv, wchar_t** _Env) {
     // some init i guess
     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
     setlocale(LC_ALL, "");
