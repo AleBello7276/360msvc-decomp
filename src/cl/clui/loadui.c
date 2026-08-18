@@ -8,6 +8,34 @@
 #undef __FILEW__
 #define __FILEW__ L"e:\\bt\\278379\\vctools\\compiler\\clui\\loadui.c"
 
+HINSTANCE LoadCLUI(wchar_t* outDir, size_t cchOutDir) {
+    wchar_t exePath[1024];
+    wchar_t cluiPath[1024];
+    WCHAR* p;
+    HINSTANCE hClui;
+
+    GetModuleFileNameW(GetModuleHandleW(NULL), exePath, 1024);
+
+    size_t len = wcslen(exePath);
+
+    p = exePath + (len >= PATH_BUFFER_SIZE - 1 ? PATH_BUFFER_SIZE - 1 : len) - 1;
+
+    while (*p != L'\\' && p != exePath)
+        --p;
+
+    *p = L'\0';
+
+    LoadUILibrary(exePath, L"clui.dll", 2, &hClui, cluiPath, 1024, NULL);
+
+    if (!hClui)
+        hClui = LoadSearchPath(cluiPath, 1024);
+
+    if (hClui != NULL && outDir != NULL)
+        wcscpy_s(outDir, cchOutDir, cluiPath);
+
+    return hClui;
+}
+
 // fck this
 HRESULT LoadUILibrary(wchar_t* dir, wchar_t* lib_name, DWORD flags, HINSTANCE* out_module, wchar_t* out_path,
                       size_t out_path_size, DWORD* out_lang) {
