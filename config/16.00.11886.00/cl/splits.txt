@@ -33,7 +33,7 @@ cl/clui/loadui.c:
     .text start:0x0040a9a7 end:0x0040a9be
     .text start:0x0041326b end:0x00413911
     .rdata start:0x00408bb4 end:0x00408bbe
-    .rdata start:0x00409a58 end:0x00409a6a
+    .rdata start:0x00409a50 end:0x00409a6a
     .rdata start:0x00408fd0 end:0x00408fd4
-    .rdata start:0x00409a48 end:0x00409a4e
+    .rdata start:0x004099F0 end:0x00409a4e
     .rdata start:0x00408fcc end:0x00408fd0

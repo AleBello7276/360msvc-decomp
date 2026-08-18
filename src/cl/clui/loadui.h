@@ -4,6 +4,8 @@
 
 #define PATH_BUFFER_SIZE 1024
 
+#define ENGLISH_US_ID 1033
+
 /**/
 HINSTANCE* LoadCLUI(wchar_t*, size_t);
 
