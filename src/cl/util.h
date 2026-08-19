@@ -8,6 +8,13 @@
 #define CMD_ERR_0x1f67 0x1f67
 #define CMD_ERR_8030 8030
 
+#define MESSAGE_ID_105 105
+
+template <size_t N>
+wchar_t* wcscat(wchar_t (&dest)[N], const wchar_t* src) {
+    return wcscat_s(dest, N, src) == 0 ? dest : nullptr;
+}
+
 /*
     strqlen (string quoted (!?!?) lenght)
     length of wchars needed to write `s` as an escaped, optionally
@@ -33,8 +40,17 @@ wchar_t* concatmeta(wchar_t* dst, size_t size, const wchar_t* concatee);
 /**/
 wchar_t* append(wchar_t* dst, size_t size, const wchar_t* appendee);
 
+/* */
 NORETURN void done(INT code);
 
+/* */
 void cmderr(DWORD error, ...);
 
+/* */
 wchar_t** sztoszv(wchar_t*, BOOL);
+
+/* */
+void print(int stream_, const wchar_t* format_, ...);
+
+/* */
+const wchar_t* get_message(UINT ID_);

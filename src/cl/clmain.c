@@ -5,10 +5,20 @@
 #include "dos.h"
 #include "mpcl.h"
 #include "util.h"
+#include "xnew.h"
 #include <clocale>
 
 context_s* Context = &CX;
-context_s CX;
+context_s CX = {};
+
+#define STDOUT 1
+
+void usage() {
+    LOGO(FALSE);
+    print(STDOUT, get_message(MESSAGE_ID_105));
+
+    exit(0);
+}
 
 size_t argcount(const wchar_t* const* args) {
     size_t result = 0;
@@ -20,11 +30,31 @@ size_t argcount(const wchar_t* const* args) {
     return result;
 }
 
-void build_context(const wchar_t* path, context_s* ctx) {
-    for (int i = 10; i != 0; i--) {
-        ctx->unk0x0 = 0;
-        ctx = ctx + 1;
+void build_context(const wchar_t* path_, context_s* ctx) {
+    memset(ctx, 0, sizeof(context_s));
+    ctx->mPath = extract_path(path_);
+}
+
+wchar_t* extract_path(const wchar_t* in_path_) {
+    const size_t BUF_LEN = 256;
+    wchar_t drive[MAX_PATH];
+    wchar_t dir[BUF_LEN];
+    wchar_t fname[BUF_LEN];
+    wchar_t ext[BUF_LEN];
+
+    _wsplitpath_s(in_path_, drive, MAX_PATH, dir, BUF_LEN, fname, BUF_LEN, ext, BUF_LEN);
+
+    int len = wcslen(dir);
+    if (len > 0) {
+        wchar_t last = dir[len - 1];
+        if (last != L'\\' && last != L':' && last != L'/') {
+            dir[len] = L'\\';
+            dir[len + 1] = L'\0';
+        }
     }
+
+    const wchar_t* final = wcscat<MAX_PATH>(drive, dir);
+    return xstrdup(final);
 }
 
 int wmain(int _Argc, wchar_t** _Argv, wchar_t** _Env) {
@@ -57,6 +87,11 @@ int wmain(int _Argc, wchar_t** _Argv, wchar_t** _Env) {
     _CL__var = nullptr;
 
     wchar_t* cl_path = fullccpath();
+    _Argv[0] = cl_path;
+    build_context(cl_path, (context_s*)Context);
+
+    if (_Argc == 1 && cl_count == 0)
+        usage();
 
     return 0;
 }

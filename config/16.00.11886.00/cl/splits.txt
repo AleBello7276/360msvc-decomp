@@ -27,6 +27,9 @@ cl/clmain.c:
     .text start:0x0040f09d end:0x0040f777
     .text start:0x0040a7fe end:0x0040a814
     .text start:0x0040ec80 end:0x0040ec9f
+    .text start:0x0040d68d end:0x0040d6af
+    .text start:0x0040dc7c end:0x0040dd37
+    .text start:0x0040af4d end:0x0040af6e
     .data start:0x00418030 end:0x00418038
 
 cl/clui/loadui.c:
