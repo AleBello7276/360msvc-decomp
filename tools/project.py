@@ -519,10 +519,19 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
         ),
         description="DELINK $in",
     )
+    n.rule(
+        name="delink_analyze",
+        command=(
+            "$python tools/run_delink_analyze.py --input $in --out-dir $out_dir "
+            "--delink $delink"
+        ),
+        description="DELINK-ANALYZE $in",
+    )
     n.newline()
 
     binaries = ["cl", "c1", "c1xx", "c2", "link", "ml"]
     split_outputs = []
+    analyze_outputs = []
     for binary in binaries:
         source = Path("orig") / config.version / f"{binary}.{'dll' if binary.startswith('c') and binary != 'cl' else 'exe'}"
         out_dir = build_path / binary
@@ -548,6 +557,19 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
             },
         )
         split_outputs.extend(outputs)
+        analysis_out = build_path / "analysis" / binary
+        analysis_outputs = [analysis_out / "symbols.csv", analysis_out / "splits.txt"]
+        n.build(
+            outputs=analysis_outputs,
+            rule="delink_analyze",
+            inputs=source,
+            implicit=[delink],
+            variables={
+                "out_dir": analysis_out,
+                "delink": delink,
+            },
+        )
+        analyze_outputs.extend(analysis_outputs)
 
     compiled = []
     for obj in objects.values():
@@ -560,7 +582,7 @@ def generate_msvc_build(config: ProjectConfig, objects: Dict[str, Object]) -> No
         compiled.append(obj.src_obj_path)
 
     n.build(outputs="split", rule="phony", inputs=split_outputs)
-    n.build(outputs="analyze", rule="phony", inputs=split_outputs)
+    n.build(outputs="analyze", rule="phony", inputs=analyze_outputs)
     n.build(outputs="all", rule="phony", inputs=compiled + ["split"])
     report_path = build_path / "report.json"
     n.rule(

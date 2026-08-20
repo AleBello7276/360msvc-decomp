@@ -8,7 +8,8 @@
             "cl/dos.c": "NonMatching",
             "cl/util.c": "NonMatching",
             "cl/clmain.c": "NonMatching",
-            "cl/clui/loadui.c": "Matching"
+            "cl/clui/loadui.c": "Matching",
+            "cl/clargs.c": "NonMatching"
         }
     }
 }

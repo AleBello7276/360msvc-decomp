@@ -40,3 +40,42 @@ cl/clui/loadui.c:
     .rdata start:0x00408fd0 end:0x00408fd4
     .rdata start:0x004099F0 end:0x00409a4e
     .rdata start:0x00408fcc end:0x00408fd0
+
+cl/clargs.c:
+    .data start:0x00419320 end:0x00419428
+    .rdata start:0x00402e78 end:0x00402e86
+    .rdata start:0x00401354 end:0x00401362
+    .rdata start:0x00404760 end:0x00404766
+    .rdata start:0x0040134c end:0x00401352
+    .rdata start:0x00401fb8 end:0x00401fbe
+    .rdata start:0x0040642c end:0x00406432
+    .rdata start:0x004064fc end:0x00406504
+    .rdata start:0x0040641c end:0x00406422
+    .rdata start:0x004064b8 end:0x004064be
+    .rdata start:0x00401dac end:0x00401dbc
+    .rdata start:0x0040177c end:0x0040178c
+    .rdata start:0x00401470 end:0x00401494
+    .rdata start:0x004064e8 end:0x004064fa
+    .rdata start:0x00401338 end:0x0040134a
+    .rdata start:0x00401324 end:0x00401336
+    .rdata start:0x0040131c end:0x00401322
+    .rdata start:0x004064d0 end:0x004064e6
+    .rdata start:0x00406414 end:0x0040641a
+    .rdata start:0x00406434 end:0x0040643a
+    .rdata start:0x004064a0 end:0x004064a6
+    .rdata start:0x00404ce0 end:0x00404cf8
+    .bss start:0x00419d24 end:0x00419d28
+    .bss start:0x00419d38 end:0x00419d3c
+    .bss start:0x00419d40 end:0x00419d50
+    .bss start:0x0041a5b8 end:0x0041a5bc
+    .bss start:0x00419cdc end:0x00419ce0
+    .bss start:0x00419d54 end:0x00419d58
+    .bss start:0x00419d14 end:0x00419d1c
+    .bss start:0x0041a594 end:0x0041a5a0
+    .bss start:0x00419d08 end:0x00419d0c
+    .bss start:0x00419d7c end:0x00419d80
+    .bss start:0x00419d74 end:0x00419d78
+    .bss start:0x0041a588 end:0x0041a58c
+    .bss start:0x0041afb0 end:0x0041afb4
+    .bss start:0x00419d6c end:0x00419d70
+    .bss start:0x0041a5cc end:0x0041a5d0
